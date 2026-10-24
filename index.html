@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نور الذكر - تطبيق التسبيح والتدبر</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 1.8rem; color: #34d399; margin-bottom: 5px; }
+        .header p { font-size: 0.9rem; color: #94a3b8; }
+        .ayah-card { background: #1e293b; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155; text-align: center; }
+        .ayah-title { font-size: 0.85rem; color: #34d399; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .ayah-text { font-size: 1.1rem; line-height: 1.8; margin-bottom: 10px; color: #f1f5f9; }
+        .ayah-source { font-size: 0.8rem; color: #94a3b8; }
+        .refresh-btn { background: none; border: none; color: #34d399; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+        .tasbih-tabs { display: flex; gap: 8px; overflow-x: auto; width: 100%; max-width: 400px; margin-bottom: 20px; padding-bottom: 5px; }
+        .tab { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 0.9rem; transition: 0.3s; }
+        .tab.active { background: #059669; color: #fff; border-color: #059669; }
+        .counter-section { background: #1e293b; border-radius: 50%; width: 260px; height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid #059669; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2); cursor: pointer; user-select: none; transition: transform 0.1s; margin-top: 10px; }
+        .counter-section:active { transform: scale(0.95); }
+        .current-tasbih { font-size: 1.5rem; font-weight: bold; color: #34d399; margin-bottom: 5px; }
+        .stats { font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px; }
+        .count-number { font-size: 4rem; font-weight: bold; color: #fff; }
+        .click-hint { font-size: 0.75rem; color: #64748b; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>نور الذكر</h1>
+        <p>تطبيق التسبيح والتدبر</p>
+    </div>
+
+    <div class="ayah-card">
+        <div class="ayah-title">
+            <span>آية وتدبر اليوم</span>
+            <button class="refresh-btn" onclick="changeAyah()">🔄 تجديد</button>
+        </div>
+        <div class="ayah-text" id="ayahText">"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ"</div>
+        <div class="ayah-source" id="ayahSource">[سورة الرعد: 28]</div>
+    </div>
+
+    <div class="tasbih-tabs" id="tabsContainer">
+        <div class="tab active" onclick="selectTasbih(0)">سبحان الله</div>
+        <div class="tab" onclick="selectTasbih(1)">الحمد لله</div>
+        <div class="tab" onclick="selectTasbih(2)">الله أكبر</div>
+        <div class="tab" onclick="selectTasbih(3)">أستغفر الله</div>
+    </div>
+
+    <div class="counter-section" onclick="incrementCount()">
+        <div class="current-tasbih" id="tasbihTitle">سبحان الله</div>
+        <div class="stats">الهدف: <span id="targetNum">33</span> مرة | المكتمل: <span id="completedRounds">0</span> دورة</div>
+        <div class="count-number" id="countNum">0</div>
+        <div class="click-hint">اضغط للتسبيح</div>
+    </div>
+
+    <script>
+        const tasbihs = [
+            { name: "سبحان الله", target: 33 },
+            { name: "الحمد لله", target: 33 },
+            { name: "الله أكبر", target: 34 },
+            { name: "أستغفر الله", target: 100 }
+        ];
+        
+        const ayahs = [
+            { text: "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", source: "[سورة الرعد: 28]" },
+            { text: "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ", source: "[سورة البقرة: 152]" },
+            { text: "وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ غُرُوبِهَا", source: "[سورة طه: 130]" },
+            { text: "وَاذْكُر رَّبَّكَ فِي نَفْسِكَ تَضَرُّعاً وَخِيفَةً وَدُونَ الْجَهْرِ مِنَ الْقَوْلِ", source: "[سورة الأعراف: 205]" }
+        ];
+
+        let currentIndex = 0;
+        let count = 0;
+        let rounds = 0;
+
+        function selectTasbih(index) {
+            currentIndex = index;
+            count = 0;
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.getElementById('tasbihTitle').innerText = tasbihs[index].name;
+            document.getElementById('targetNum').innerText = tasbihs[index].target;
+            document.getElementById('countNum').innerText = count;
+        }
+
+        function incrementCount() {
+            count++;
+            if (count > tasbihs[currentIndex].target) {
+                count = 1;
+                rounds++;
+                document.getElementById('completedRounds').innerText = rounds;
+            }
+            document.getElementById('countNum').innerText = count;
+        }
+
+        function changeAyah() {
+            const randomIdx = Math.floor(Math.random() * ayahs.length);
+            document.getElementById('ayahText').innerText = `"${ayahs[randomIdx].text}"`;
+            document.getElementById('ayahSource').innerText = ayahs[randomIdx].source;
+        }
+    </script>
+</body>
+</html>
