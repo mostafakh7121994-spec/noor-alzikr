@@ -1,0 +1,28 @@
+{
+  "background_color": "rgb(0, 0, 0)",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "نور الذكر",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "نور الذكر",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://codepen.io/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "48x48",
+      "isSquare": true,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 48,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "id": "تطبيق لذكر و التسبيح",
+  "description": "تطبيق ديني لتسهيل الذكر"
+}
